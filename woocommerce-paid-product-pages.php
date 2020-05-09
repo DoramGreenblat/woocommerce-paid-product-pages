@@ -3,7 +3,7 @@
 * Plugin Name: Woocommerce Paid Product Pages
 * Plugin URI: https://github.com/DoramGreenblat/woocommerce-paid-product-pages
 * Description: This plugin will allow users to put the product content behind a pay wall
-* Version: 1.0
+* Version: 1.1
 * Author: Doram Greenblat
 * Author URI: https://github.com/DoramGreenblat
 **/
@@ -18,6 +18,9 @@ add_filter( 'woocommerce_is_purchasable', 'disable_repeat_purchase_for_tamboo', 
 
 # Run function at before_single_product Marker
 add_action( 'woocommerce_before_single_product', 'handleProductChangeOncePurchased', 11 );
+
+# Call the function to provide clickable link to product page on order email and payment complete page
+add_filter( 'woocommerce_order_item_name', 'display_product_title_as_link', 10, 2 );
 
 function handleProductChangeOncePurchased() {
     global $product,$woocommerce, $post;
@@ -95,5 +98,14 @@ function longDescriptionReplay() {
             <?php the_content(); ?>
         </div>
     <?php
+}
+
+function display_product_title_as_link( $item_name, $item ) {
+
+    $_product = wc_get_product( $item['variation_id'] ? $item['variation_id'] : $item['product_id'] );
+
+    $link = get_permalink( $_product->get_id() );
+
+    return '<a href="'. $link .'"  rel="nofollow">'. $item_name .'</a>';
 }
 

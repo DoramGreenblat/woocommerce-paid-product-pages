@@ -11,7 +11,6 @@
 // Remove BreadCrumbs
 remove_action('woocommerce_before_main_content', 'woocommerce_breadcrumb', 20, 0);
 
-// These may slow down all pages and may need to go to a more strategic location
 // The Below ensures product cannot be purchased more than 1x
 add_filter( 'woocommerce_variation_is_purchasable', 'disable_repeat_purchase_for_tamboo', 10, 2 );
 add_filter( 'woocommerce_is_purchasable', 'disable_repeat_purchase_for_tamboo', 10, 2 );
@@ -23,7 +22,7 @@ add_action( 'woocommerce_before_single_product', 'handleProductChangeOncePurchas
 add_filter( 'woocommerce_order_item_name', 'display_product_title_as_link', 10, 2 );
 
 function handleProductChangeOncePurchased() {
-    global $product,$woocommerce, $post;
+    global $product, $post;
 	
     $product_id=$product->id;
     $string_values = $product->get_attribute('Purchase');
@@ -38,12 +37,12 @@ function handleProductChangeOncePurchased() {
 	}
 }
 
-function remove_description_tab_unless_purchased( $tabs, $product, $woocommerce, $post ) {
-    // Get the ID for the current product (passed in)
-    $product_id = $product->get_id();
+function remove_description_tab_unless_purchased(  ) {
+	global $product;
+	global $tabs;
+
     $string_values = $product->get_attribute('Purchase');
-    if (( ! empty($string_values) ) && ($string_values == 1 ))   { 
-		
+    if ( ! empty($string_values) )    { 
             unset( $tabs['description'] );
             return $tabs;
 	}

@@ -1,2 +1,7 @@
 # woocommerce-paid-product-pages
-woocommerce plugin to hide pages behind payment facility
+This plugin will hide the product description until payment made. 
+After which the product purchase options are removed, and user will have access to product page content
+
+## Activation of product
+Navigate to product attributes and create an attribute called "Purchase"
+I recommend making it hidable too.

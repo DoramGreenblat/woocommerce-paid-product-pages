@@ -4,4 +4,4 @@ After which the product purchase options are removed, and user will have access 
 
 ## Activation of product
 Navigate to product attributes and create an attribute called "Purchase"
-I recommend making it hidable too.
+I recommend setting "Visible on the product page" to False

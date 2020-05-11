@@ -3,7 +3,7 @@
 * Plugin Name: Woocommerce Paid Product Pages
 * Plugin URI: https://github.com/DoramGreenblat/woocommerce-paid-product-pages
 * Description: This plugin will allow users to put the product content behind a pay wall
-* Version: 1.1
+* Version: 1.2
 * Author: Doram Greenblat
 * Author URI: https://github.com/DoramGreenblat
 **/

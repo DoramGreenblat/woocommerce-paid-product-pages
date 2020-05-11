@@ -84,6 +84,14 @@ function removeAllButLongDescription(){
     remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20 );
     remove_action( 'woocommerce_product_thumbnails', 'woocommerce_show_product_thumbnails', 20 );
     
+    # Remove variations add to cart
+    remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 );
+    remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
+    remove_action( 'woocommerce_variable_add_to_cart', 'woocommerce_variable_add_to_cart', 30 );
+
+    # Remove SKU
+    add_filter( 'wc_product_sku_enabled', '__return_false' );
+
     // Right column
     remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_title', 5 );
     remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_rating', 10 );

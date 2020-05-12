@@ -3,7 +3,7 @@
 * Plugin Name: Woocommerce Paid Product Pages
 * Plugin URI: https://github.com/DoramGreenblat/woocommerce-paid-product-pages
 * Description: This plugin will allow users to put the product content behind a pay wall
-* Version: 1.2
+* Version: 1.3
 * Author: Doram Greenblat
 * Author URI: https://github.com/DoramGreenblat
 **/
@@ -29,23 +29,24 @@ function handleProductChangeOncePurchased() {
 
     if (( !empty($string_values) ))   { 	
     	if ( wc_customer_bought_product( wp_get_current_user()->user_email, get_current_user_id(), $product_id ) ) {
-			removeAllButLongDescription();
-	    }else{
-	        add_filter( 'woocommerce_product_tabs', 'remove_description_tab_unless_purchased', 11 );
-	
-		}
+  	    removeAllButLongDescription();
+	}else{
+	    add_filter( 'woocommerce_product_tabs', 'remove_description_tab_unless_purchased', 11 );
+	    add_filter( 'woocommerce_is_sold_individually', 'woo_remove_all_quantity_fields', 10, 2 );
+	    add_filter( 'wc_product_sku_enabled', '__return_false' );
 	}
+    }
 }
 
 function remove_description_tab_unless_purchased(  ) {
-	global $product;
-	global $tabs;
+    global $product;
+    global $tabs;
 
     $string_values = $product->get_attribute('Purchase');
     if ( ! empty($string_values) )    { 
-            unset( $tabs['description'] );
-            return $tabs;
-	}
+        unset( $tabs['description'] );
+        return $tabs;
+    }
 }
 
 function disable_repeat_purchase_for_tamboo( $purchasable, $product ) {
@@ -53,10 +54,10 @@ function disable_repeat_purchase_for_tamboo( $purchasable, $product ) {
     $product_id = $product->get_id();
     
     // Bailout if not a product with Attribute "Purchase"
-  	$string_values = $product->get_attribute('Purchase');
+    $string_values = $product->get_attribute('Purchase');
     if (( empty($string_values) ))   { 
-	    return $purchasable;
-	}
+        return $purchasable;
+    }
 
     // return false if the customer has bought the product
     if ( wc_customer_bought_product( wp_get_current_user()->user_email, get_current_user_id(), $product_id ) ) {
@@ -88,10 +89,10 @@ function removeAllButLongDescription(){
     remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation', 10 );
     remove_action( 'woocommerce_single_variation', 'woocommerce_single_variation_add_to_cart_button', 20 );
     remove_action( 'woocommerce_variable_add_to_cart', 'woocommerce_variable_add_to_cart', 30 );
-
+ 
     # Remove SKU
     add_filter( 'wc_product_sku_enabled', '__return_false' );
-
+	
     // Right column
     remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_title', 5 );
     remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_rating', 10 );
@@ -116,3 +117,7 @@ function display_product_title_as_link( $item_name, $item ) {
     return '<a href="'. $link .'"  rel="nofollow">'. $item_name .'</a>';
 }
 
+/** * @desc Remove in all product type */
+function woo_remove_all_quantity_fields( $return, $product ) {
+    return true;
+}

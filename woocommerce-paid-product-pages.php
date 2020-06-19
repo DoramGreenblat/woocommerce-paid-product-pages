@@ -3,7 +3,7 @@
 * Plugin Name: Woocommerce Paid Product Pages
 * Plugin URI: https://github.com/DoramGreenblat/woocommerce-paid-product-pages
 * Description: This plugin will allow users to put the product content behind a pay wall
-* Version: 2.1
+* Version: 2.2
 * Author: Doram Greenblat
 * Author URI: https://github.com/DoramGreenblat
 **/
@@ -47,9 +47,9 @@ add_filter( 'woocommerce_output_related_products_args', 'setRelatedProductsItems
 function beenThereDoneThat(){
     if( ! is_user_logged_in() )
     {
-        printf( '<p align=\'center\'><a href="%s">%s</a>', wp_login_url( get_permalink() ),
-            __( 'I think you\'ve purchased this product before.<br> Please click here to login and view this content</p>' )
-        );
+		$dejavu = show_post('secret-dejavu-content');
+        printf( '<p align=\'center\'><a href="%s" style="inherit">%s</a>', wp_login_url( get_permalink() ), __($dejavu) ) ;
+		
 		remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20);
 	    remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10 );
         #add_action( 'woocommerce_after_single_product_summary', 'longDescriptionReplay', 10 );
@@ -75,6 +75,13 @@ function beenThereDoneThat(){
     }
 }
 
+function show_post($path) {
+    $post = get_page_by_path($path);
+    $content = apply_filters('the_content', $post->post_content);
+    return $content;
+}
+
+
 function handleProductChangeOncePurchased() {
     global $product, $post, $woocommerce;
     $product_id=$product->id;
@@ -96,7 +103,9 @@ function handleProductChangeOncePurchased() {
 			if (isset($_GET['dejaVu'])){
 				beenThereDoneThat();
 			}
-			tambooReplaceImages($product, $post, $woocommerce);
+			if (!isset($_GET['dejaVu'])){
+				tambooReplaceImages($product, $post, $woocommerce);
+			}
 		}		
     }
 }
@@ -154,26 +163,6 @@ function getAlternativeFile($img, $imgParts){
 	}
 	return $img;
 }
-
-/*
-function _get_all_image_sizes() {
-	global $_wp_additional_image_sizes;
-    $image_sizes = array();
-    $default_image_sizes = array( 'thumbnail', 'medium', 'large' );
-    foreach ( $default_image_sizes as $size ) {
-        $image_sizes[$size] = array(
-            'width'  => intval( get_option( "{$size}_size_w" ) ),
-            'height' => intval( get_option( "{$size}_size_h" ) ),
-            'crop'   => get_option( "{$size}_crop" ) ? get_option( "{$size}_crop" ) : false,
-        );
-    }
-    if ( isset( $_wp_additional_image_sizes ) && count( $_wp_additional_image_sizes ) ) {
-        $image_sizes = array_merge( $image_sizes, $_wp_additional_image_sizes );
-    }
-	return $image_sizes ;
-}
-*/
-
 
 function remove_description_tab_unless_purchased(  ) {
 	/* As the title says:

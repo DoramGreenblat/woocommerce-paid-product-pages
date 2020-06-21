@@ -3,7 +3,7 @@
 * Plugin Name: Woocommerce Paid Product Pages
 * Plugin URI: https://github.com/DoramGreenblat/woocommerce-paid-product-pages
 * Description: This plugin will allow users to put the product content behind a pay wall
-* Version: 2.2
+* Version: 2.3
 * Author: Doram Greenblat
 * Author URI: https://github.com/DoramGreenblat
 **/
@@ -48,7 +48,9 @@ function beenThereDoneThat(){
     if( ! is_user_logged_in() )
     {
 		$dejavu = show_post('secret-dejavu-content');
-        printf( '<p align=\'center\'><a href="%s" style="inherit">%s</a>', wp_login_url( get_permalink() ), __($dejavu) ) ;
+		$linkedDejavuPre = preg_replace("/{loginLink}/i", "<a href='" . wp_login_url( get_permalink() ) . "'>", $dejavu);
+		$linkedDejavu = preg_replace("/{\/loginLink}/i", "</a>", $linkedDejavuPre);
+        printf( '<p align=\'center\'>%s', __($linkedDejavu) ) ;
 		
 		remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20);
 	    remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10 );
@@ -135,13 +137,13 @@ function tambooReplaceImages($product, $post, $woocommerce){
 	$imagePath = get_home_path() . "/" . substr($imgParts['dirname'],strpos($imgParts['dirname'],"/wp-content"));
 
 	if (!file_exists($imagePath . "/" . $imgParts['filename'] . "-320x320."  . $imgParts['extension'] ) ){
-		$img = getAlternativeFile($img, $imgParts);	
+		$img = getAlternativeFile($img, $imgParts, 300, 330);	
 	}
 	echo apply_filters('woocommerce_single_product_image_html', sprintf("<img src='%s' style='width:300px;max-height:300px; align=left;border-radius: 10px;float:left;display: inline-block;'></li>", $img)); 
 	
 }
 
-function getAlternativeFile($img, $imgParts){
+function getAlternativeFile($img, $imgParts, $minWidth, $maxWidth){
 	$imagePath = get_home_path() . "/" . substr($imgParts['dirname'],strpos($imgParts['dirname'],"/wp-content"));
 	$scandir = scandir($imagePath);
 	$alternativeFound = false;
@@ -151,7 +153,7 @@ function getAlternativeFile($img, $imgParts){
 			$dimensions = explode("x",preg_replace("/(.jpeg|-)/", "", substr($file,strlen($imgParts['filename'])) ));
 			$width = $dimensions[0];
 			$height = $dimensions[1];
-			if (($width > 300) && ($width < 330) && (abs((1 - $width / $height) * 100 ) < 15)){
+			if (($width > $minWidth) && ($width < $maxWidth) && (abs((1 - $width / $height) * 100 ) < 15)){
 				$alternativeFound = true;
 				$img = $imgParts['dirname'] . "/" . $imgParts['filename'] . "-" . $width . "x" . $height . "." . $imgParts['extension'];
 				break;
@@ -331,7 +333,8 @@ function rebuildProductListings() {
 	*/
 	global $product;
 	$imgParts = pathinfo(wp_get_attachment_url( $product->get_image_id() ));
-	$img = $imgParts['dirname'] . "/" . $imgParts['filename'] . "-150x150." . $imgParts['extension'];
+	$imageName = $imgParts['filename'] = preg_replace("/-e[0-9]{13}/", "", $imgParts['filename']);
+	$img = $imgParts['dirname'] . "/" . $imageName . "-150x150." . $imgParts['extension'];
 	echo "<img src='" . $img . "' style='max-height:150px;width: auto;height: auto; padding: 20px; align=left;border-radius: 30px;float:left;'></a>";
     echo getShortDescription();
 }
@@ -437,7 +440,7 @@ add_filter( 'query_vars', 'bbloomer_purchased_products_query_vars', 0 );
 // 3. Insert the new endpoint into the My Account menu
   
 function bbloomer_add_purchased_products_link_my_account( $items ) {
-	$reorderedAppended = array_slice($items, 0, 1, true) + array("purchased-products" => "My Lectures") + array_slice($items, 1, count($items) - 1, true) ;
+	$reorderedAppended = array_slice($items, 0, 1, true) + array("purchased-products" => "My lectures") + array_slice($items, 1, count($items) - 1, true) ;
     return $reorderedAppended;
 }
   
